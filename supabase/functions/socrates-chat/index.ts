@@ -47,7 +47,7 @@ serve(async (req) => {
     // Get user's profile to find their subjects
     const { data: profile } = await supabaseAdmin
       .from('profiles')
-      .select('class_number')
+      .select('class_number, full_name, email')
       .eq('id', user.id)
       .single();
 
@@ -231,6 +231,17 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
     const topicKeywords = extractTopics(message + ' ' + aiResponse);
     if (topicKeywords.length > 0) {
       for (const topic of topicKeywords) {
+        // Log individual student query with name
+        await supabaseAdmin
+          .from('student_query_log')
+          .insert({
+            student_id: user.id,
+            student_name: profile?.full_name || profile?.email || 'Unknown Student',
+            topic: topic,
+            question: message.slice(0, 200)
+          });
+
+        // Update aggregate struggles table
         const { data: existingStruggle } = await supabaseAdmin
           .from('student_struggles')
           .select('*')

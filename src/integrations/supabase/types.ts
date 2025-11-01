@@ -112,6 +112,33 @@ export type Database = {
         }
         Relationships: []
       }
+      student_query_log: {
+        Row: {
+          created_at: string
+          id: string
+          question: string
+          student_id: string
+          student_name: string
+          topic: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question: string
+          student_id: string
+          student_name: string
+          topic: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question?: string
+          student_id?: string
+          student_name?: string
+          topic?: string
+        }
+        Relationships: []
+      }
       student_struggles: {
         Row: {
           created_at: string
