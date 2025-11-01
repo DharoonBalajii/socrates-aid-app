@@ -1,232 +1,327 @@
-# Socrates AI - Python Analytics Pipeline
+# Student Analytics Pipeline
 
-A comprehensive data analytics pipeline for analyzing student learning patterns, struggles, and engagement in the Socrates AI educational platform.
-
-## Overview
-
-This Python analytics system connects to your Supabase database to analyze:
-- Student query patterns and engagement
-- Common struggle topics and trends
-- Class-level performance comparisons
-- At-risk student identification using machine learning
-- Automated report generation for teachers
+A comprehensive Python-based analytics system for analyzing student learning data, identifying struggle patterns, and providing actionable insights for teachers.
 
 ## Features
 
-### 📊 Data Analysis
-- **Query Analysis**: Temporal patterns, peak usage times, engagement metrics
-- **Struggle Analysis**: Identify most challenging topics, at-risk students
-- **Class Comparison**: Compare performance across different classes
-- **Trend Detection**: Identify emerging problem areas
+### Core Analytics
+- **Data Processing**: Clean and process student query logs and struggle data from Supabase
+- **Pattern Analysis**: Identify common struggle topics, query patterns, and class performance metrics
+- **Visualizations**: Generate interactive charts and graphs for trend analysis
+- **ML Predictions**: Use machine learning to predict at-risk students and cluster learners
 
-### 📈 Data Visualization
-- Bar charts of top struggling topics
-- Timeline graphs of query activity
-- Heatmaps of usage patterns by day/hour
-- Class performance comparisons
-- Student engagement distributions
+### Advanced Features
+- **Student Clustering**: Group students by learning patterns using K-means
+- **Anomaly Detection**: Identify unusual patterns in student behavior
+- **Trend Forecasting**: Predict future query trends and workload
+- **Learning Pattern Recognition**: Discover common study sequences and peak hours
 
-### 🤖 Machine Learning
-- Predict which students are likely to struggle
-- Classify at-risk students based on behavior patterns
-- Recommend personalized interventions
-- Feature importance analysis
+### Automation & Integration
+- **Automated Reports**: Generate PDF and HTML reports with comprehensive insights
+- **Email Notifications**: Send weekly reports and real-time alerts to teachers
+- **Scheduled Tasks**: Automated daily, weekly, and monthly analytics runs
+- **REST API**: Integrate analytics directly into your web application
 
-### 📄 Report Generation
-- Comprehensive PDF reports for teachers
-- HTML summary dashboards
-- Automated chart integration
-- Actionable insights and recommendations
+## Setup
 
-## Installation
-
-### Prerequisites
-- Python 3.8 or higher
-- pip package manager
-
-### Setup
-
-1. **Install Python dependencies:**
+### 1. Install Dependencies
 ```bash
 cd python-analytics
 pip install -r requirements.txt
 ```
 
-2. **Configure environment variables:**
-Create a `.env` file in the `python-analytics` directory:
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-SUPABASE_DB_URL=your_postgres_connection_string
+### 2. Configure Environment Variables
+Copy `.env.example` to `.env` and fill in your credentials:
+```bash
+cp .env.example .env
 ```
 
-You can find these values in your Lovable Cloud backend settings.
+Required variables:
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_SERVICE_ROLE_KEY`: Service role key (for admin access)
+- `SUPABASE_ANON_KEY`: Anonymous key (for API access)
+- `SUPABASE_DB_URL`: Direct database URL (optional)
+- `RESEND_API_KEY`: Resend API key for email (optional)
+- `EMAIL_FROM`: Sender email address
+- `TEACHER_EMAILS`: Comma-separated list of teacher emails
 
 ## Usage
 
-### Quick Start
+### Basic Analytics
 
-Run the complete analytics pipeline:
+#### Run Complete Analysis
 ```bash
-# Analyze student data
 python analyze_student_data.py
+```
 
-# Generate visualizations
-python visualizations.py
-
-# Train ML models and get predictions
-python ml_predictions.py
-
-# Generate comprehensive reports
+#### Generate Reports
+```bash
 python generate_reports.py
 ```
 
-### Individual Components
-
-**Data Processing:**
-```python
-from data_processor import DataProcessor
-
-processor = DataProcessor()
-data = processor.get_processed_data(days=30)
-print(f"Queries: {len(data['queries'])}")
-print(f"Struggles: {len(data['struggles'])}")
+#### Create Visualizations
+```bash
+python visualizations.py
 ```
 
-**Analysis:**
-```python
-from analyze_student_data import StudentDataAnalyzer
+### Advanced ML Analysis
 
-analyzer = StudentDataAnalyzer(days=30)
-report = analyzer.generate_summary_report()
-print(report['insights'])
+#### Train ML Models
+```bash
+python ml_predictions.py
 ```
 
-**Visualizations:**
-```python
-from visualizations import DataVisualizer
-
-visualizer = DataVisualizer()
-visualizer.generate_all_charts(days=30)
+#### Advanced Analytics (Clustering, Forecasting)
+```bash
+python advanced_ml.py
 ```
 
-**Machine Learning:**
-```python
-from ml_predictions import StudentPredictionModel
+### Email Reports
 
-model = StudentPredictionModel()
-metrics = model.train_struggle_predictor()
-at_risk = model.predict_at_risk_students()
+#### Send Manual Report
+```bash
+python email_reports.py
 ```
 
-**Report Generation:**
-```python
-from generate_reports import ReportGenerator
+#### Schedule Automated Reports
+```bash
+python scheduler.py
+```
 
-generator = ReportGenerator()
-pdf_path = generator.create_pdf_report()
-html_path = generator.create_summary_html()
+Run specific scheduled tasks:
+```bash
+python scheduler.py daily    # Run daily analysis
+python scheduler.py weekly   # Send weekly report
+python scheduler.py monthly  # Update ML models
+```
+
+### API Server
+
+Start the REST API server:
+```bash
+python api_integration.py
+```
+
+API will be available at `http://localhost:5000`
+
+#### Available Endpoints:
+- `GET /api/health` - Health check
+- `GET /api/analytics/summary` - Overview statistics
+- `GET /api/analytics/struggles` - Top struggle topics
+- `GET /api/analytics/at-risk` - At-risk students
+- `GET /api/analytics/trends` - Trend analysis and forecasting
+- `GET /api/analytics/clusters` - Student clustering results
+- `GET /api/analytics/anomalies` - Anomaly detection results
+- `POST /api/analytics/generate-report` - Generate new report
+
+## Automation
+
+### Setting Up Cron Jobs (Linux/Mac)
+
+Edit crontab:
+```bash
+crontab -e
+```
+
+Add these lines:
+```bash
+# Daily analysis at 6 AM
+0 6 * * * cd /path/to/python-analytics && python scheduler.py daily
+
+# Weekly report every Monday at 8 AM
+0 8 * * 1 cd /path/to/python-analytics && python scheduler.py weekly
+
+# Monthly ML update on 1st of month at 2 AM
+0 2 1 * * cd /path/to/python-analytics && python scheduler.py monthly
+```
+
+### Setting Up Windows Task Scheduler
+
+1. Open Task Scheduler
+2. Create Basic Task
+3. Set trigger (daily, weekly, etc.)
+4. Action: Start a Program
+5. Program: `python`
+6. Arguments: `C:\path\to\scheduler.py daily`
+
+## Output
+
+### Reports Directory Structure
+```
+reports/
+├── analytics_report.pdf      # PDF report
+├── analytics_report.html     # HTML report
+└── charts/                   # Individual charts
+    ├── struggles_chart.png
+    ├── query_timeline.png
+    ├── hourly_heatmap.png
+    └── cluster_visualization.png
+```
+
+### Model Storage
+```
+models/
+├── kmeans_model.pkl          # Student clustering model
+├── anomaly_detector.pkl      # Anomaly detection model
+└── risk_predictor.pkl        # Risk prediction model
 ```
 
 ## Configuration
 
-Edit `config.py` to customize:
+### Analysis Parameters (`config.py`)
 
 ```python
 ANALYSIS_CONFIG = {
-    'min_query_threshold': 5,
-    'struggle_score_threshold': 3,
-    'recent_days': 30,
-    'top_topics_limit': 10,
-}
-
-REPORT_CONFIG = {
-    'output_dir': 'reports',
-    'charts_dir': 'reports/charts',
-    'format': 'pdf',
+    'min_struggle_count': 3,        # Min occurrences to flag struggle
+    'days_to_analyze': 30,          # Historical window
+    'at_risk_threshold': 0.7,       # Risk score threshold
+    'trend_window': 7,              # Days for trend calculation
+    'anomaly_sensitivity': 2.5,     # Anomaly detection sensitivity
 }
 
 ML_CONFIG = {
-    'test_size': 0.2,
-    'random_state': 42,
-    'min_samples_for_training': 50,
+    'n_clusters': 4,                # Number of student clusters
+    'forecast_days': 7,             # Days to forecast ahead
+    'enable_clustering': True,
+    'enable_forecasting': True,
+}
+
+REPORT_CONFIG = {
+    'enable_email': True,           # Send email reports
+    'report_schedule': 'weekly',    # Report frequency
 }
 ```
 
-## Output Files
-
-### Generated Reports
-- `reports/socrates_report_[timestamp].pdf` - Comprehensive PDF report
-- `reports/socrates_summary_[timestamp].html` - HTML dashboard
-- `reports/analysis_report.json` - Raw analysis data
-
-### Visualizations
-- `reports/charts/struggle_topics.png` - Top struggling topics
-- `reports/charts/query_timeline.png` - Activity timeline
-- `reports/charts/activity_heatmap.png` - Usage heatmap
-- `reports/charts/class_comparison.png` - Class performance
-- `reports/charts/engagement_distribution.png` - Engagement levels
-
-### ML Models
-- `models/struggle_classifier.pkl` - Trained ML model
-
 ## Data Sources
 
-The analytics pipeline connects to these Supabase tables:
-- `student_query_log` - Student AI tutor queries
-- `student_struggles` - Logged struggle topics
-- `profiles` - Student profile information
+### Supabase Tables
+- `student_query_log`: Individual student questions
+- `student_struggles`: Aggregated struggle patterns
+- `profiles`: Student profile information
+- `user_roles`: User role assignments
 
-## Use Cases
+## Machine Learning Models
 
-1. **Weekly Teacher Reports**: Run every Monday to analyze the previous week
-2. **Student Intervention**: Identify at-risk students for personalized support
-3. **Curriculum Planning**: Identify challenging topics that need more coverage
-4. **Resource Allocation**: Determine when students need the most support
-5. **Performance Tracking**: Monitor class and individual progress over time
+### 1. Risk Prediction (Random Forest)
+- Predicts students likely to struggle
+- Uses query frequency, topic diversity, time patterns
+- Provides confidence scores
 
-## Automation
+### 2. Student Clustering (K-Means)
+- Groups students by learning behavior
+- Labels: High/Moderate/Low/Minimal Engagement
+- Helps personalize interventions
 
-Set up automated reports using cron (Linux/Mac) or Task Scheduler (Windows):
+### 3. Anomaly Detection (Isolation Forest)
+- Identifies unusual query patterns
+- Detects sudden spikes or drops
+- Alerts for immediate attention
 
-```bash
-# Run weekly report every Monday at 8 AM
-0 8 * * 1 cd /path/to/python-analytics && python generate_reports.py
-```
+### 4. Trend Forecasting (Moving Average)
+- Predicts future query volumes
+- Helps with resource planning
+- 7-day forecast with confidence levels
+
+## Integration with Web App
+
+### Option 1: REST API
+Use the Flask API server to integrate real-time analytics into your React application.
+
+### Option 2: Direct Database Access
+Query Supabase tables directly from your web app for the most current data.
+
+### Option 3: Scheduled Reports
+Run analytics periodically and store results in Supabase for the web app to display.
+
+## Email Notifications
+
+### Setup Resend
+1. Sign up at https://resend.com
+2. Verify your domain at https://resend.com/domains
+3. Create API key at https://resend.com/api-keys
+4. Add key to `.env` file
+
+### Alert Types
+- **Weekly Reports**: Comprehensive analytics summary
+- **High Risk Alerts**: Many at-risk students detected
+- **Topic Alerts**: Widespread difficulty with specific topics
+- **Query Spikes**: Unusual increase in questions
+
+## Performance Optimization
+
+### For Large Datasets
+- Enable caching in `config.py`
+- Adjust `days_to_analyze` to reduce data volume
+- Use database indexes on `created_at` columns
+- Consider data archiving for old records
 
 ## Troubleshooting
 
-**Database Connection Issues:**
-- Verify your Supabase credentials in `.env`
-- Ensure your IP is allowed in Supabase settings
-- Check that tables exist and have data
+### Common Issues
 
-**Insufficient Data:**
-- ML models require minimum 50 samples for training
-- Some analyses need at least 5-10 data points
-- Wait for more student activity or lower thresholds in `config.py`
+**No data returned from Supabase**
+- Check database connection string
+- Verify service role key has proper permissions
+- Ensure tables exist and have data
 
-**Missing Charts:**
-- Ensure matplotlib and seaborn are installed
-- Check write permissions in `reports/charts/` directory
-- Verify data is available for visualization
+**Email not sending**
+- Verify RESEND_API_KEY is set
+- Check domain is verified in Resend dashboard
+- Confirm EMAIL_FROM matches verified domain
 
-## Contributing
+**ML models failing**
+- Ensure sufficient data (minimum 100 records)
+- Check for missing or null values in data
+- Verify pandas/numpy versions match requirements
 
-This analytics pipeline is part of the Socrates AI project. To add new features:
+**API authentication errors**
+- Include `Authorization: Bearer <token>` header
+- Use valid Supabase JWT token
+- Check CORS settings if calling from web app
 
-1. Follow the existing code structure
-2. Add configuration options to `config.py`
-3. Document functions with docstrings
-4. Test with sample data before production use
+## Development
+
+### Running Tests
+```bash
+# Test individual modules
+python data_processor.py
+python advanced_ml.py
+python email_reports.py
+```
+
+### Adding New Analytics
+1. Add analysis function to `analyze_student_data.py`
+2. Update report generation in `generate_reports.py`
+3. Add visualization in `visualizations.py`
+4. Create API endpoint in `api_integration.py`
+
+## Project Structure
+
+```
+python-analytics/
+├── config.py                 # Configuration settings
+├── data_processor.py         # Data extraction and cleaning
+├── analyze_student_data.py   # Core analytics engine
+├── visualizations.py         # Chart generation
+├── ml_predictions.py         # Basic ML predictions
+├── advanced_ml.py            # Advanced ML features
+├── generate_reports.py       # Report generation
+├── email_reports.py          # Email functionality
+├── scheduler.py              # Task automation
+├── api_integration.py        # REST API server
+├── requirements.txt          # Python dependencies
+├── .env.example              # Environment template
+└── README.md                 # This file
+```
 
 ## License
 
-Part of the Socrates AI educational platform project.
+MIT
 
 ## Support
 
 For issues or questions:
-1. Check the Lovable Cloud documentation
-2. Review the Supabase connection settings
-3. Verify data is being collected in the database tables
+1. Check documentation in code comments
+2. Review troubleshooting section
+3. Check Supabase connection and data
+4. Verify all environment variables are set
