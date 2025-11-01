@@ -43,6 +43,8 @@ export type Database = {
           chat_id: string
           content: string
           created_at: string
+          document_name: string | null
+          document_url: string | null
           id: string
           image_url: string | null
           role: string
@@ -52,6 +54,8 @@ export type Database = {
           chat_id: string
           content: string
           created_at?: string
+          document_name?: string | null
+          document_url?: string | null
           id?: string
           image_url?: string | null
           role: string
@@ -61,6 +65,8 @@ export type Database = {
           chat_id?: string
           content?: string
           created_at?: string
+          document_name?: string | null
+          document_url?: string | null
           id?: string
           image_url?: string | null
           role?: string
