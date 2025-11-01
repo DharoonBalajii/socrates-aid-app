@@ -49,6 +49,7 @@ const TeacherDashboard = () => {
   const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showUploadSection, setShowUploadSection] = useState(false);
+  const [showStrugglesSection, setShowStrugglesSection] = useState(false);
 
   useEffect(() => {
     loadStruggles();
@@ -321,7 +322,7 @@ const TeacherDashboard = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-primary" />
-                Total Topics Tracked
+                Areas for Focus
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -341,53 +342,70 @@ const TeacherDashboard = () => {
           </Card>
         </div>
 
-        <Card className="shadow-soft border-border/50">
-          <CardHeader>
-            <CardTitle>Common Student Struggles</CardTitle>
-            <CardDescription>
-              Topics where multiple students need help - prioritize these in class
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {struggles.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>No student struggles tracked yet</p>
-                  <p className="text-sm">Data will appear as students ask questions</p>
-                </div>
-              ) : (
-                struggles.map((struggle) => (
-                  <div
-                    key={struggle.id}
-                    className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:bg-accent/50 transition-smooth"
-                  >
-                    <div
-                      className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold ${
-                        struggle.student_count >= 5
-                          ? 'bg-destructive text-destructive-foreground'
-                          : struggle.student_count >= 3
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-secondary-foreground'
-                      }`}
-                    >
-                      {struggle.student_count}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold mb-1">{struggle.topic}</h3>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {struggle.question_summary}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Last asked: {new Date(struggle.last_asked).toLocaleDateString()}
-                      </p>
-                    </div>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Student Query Insights</h2>
+            <p className="text-sm text-muted-foreground">View common topics where students need help</p>
+          </div>
+          <Button
+            onClick={() => setShowStrugglesSection(!showStrugglesSection)}
+            variant={showStrugglesSection ? "outline" : "default"}
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+          >
+            <TrendingUp className="mr-2 h-4 w-4" />
+            {showStrugglesSection ? 'Hide Summary' : 'View Summary'}
+          </Button>
+        </div>
+
+        {showStrugglesSection && (
+          <Card className="shadow-soft border-border/50 animate-fade-in">
+            <CardHeader>
+              <CardTitle>Common Student Struggles</CardTitle>
+              <CardDescription>
+                Topics where multiple students need help - prioritize these in class
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {struggles.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No student struggles tracked yet</p>
+                    <p className="text-sm">Data will appear as students ask questions</p>
                   </div>
-                ))
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                ) : (
+                  struggles.map((struggle) => (
+                    <div
+                      key={struggle.id}
+                      className="flex items-start gap-4 p-4 rounded-lg border border-border/50 hover:bg-accent/50 transition-smooth"
+                    >
+                      <div
+                        className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center font-bold ${
+                          struggle.student_count >= 5
+                            ? 'bg-destructive text-destructive-foreground'
+                            : struggle.student_count >= 3
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-secondary text-secondary-foreground'
+                        }`}
+                      >
+                        {struggle.student_count}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold mb-1">{struggle.topic}</h3>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {struggle.question_summary}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Last asked: {new Date(struggle.last_asked).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );
