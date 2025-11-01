@@ -2,8 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { 
+import {
   GraduationCap, 
   BookOpen, 
   Users, 
@@ -23,10 +22,6 @@ import {
 const Index = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
-  const featuresRef = useScrollAnimation();
-  const howItWorksRef = useScrollAnimation();
-  const benefitsRef = useScrollAnimation();
-  const ctaRef = useScrollAnimation();
 
   useEffect(() => {
     if (!loading && user && profile) {
@@ -128,9 +123,9 @@ const Index = () => {
       </section>
 
       {/* Features section */}
-      <section ref={featuresRef.ref} className="relative z-10 container mx-auto px-6 py-20">
+      <section className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className={`text-center mb-16 transition-all duration-700 ${featuresRef.isVisible ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-10'}`}>
+          <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Why Choose StemPal?
@@ -182,13 +177,7 @@ const Index = () => {
             ].map((feature, index) => (
               <div 
                 key={index}
-                className={`group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-500 hover:-translate-y-2 ${
-                  featuresRef.isVisible ? 'animate-scale-in opacity-100' : 'opacity-0 scale-95'
-                }`}
-                style={{ 
-                  animationDelay: featuresRef.isVisible ? `${index * 0.1}s` : '0s',
-                  transitionDelay: `${index * 0.1}s`
-                }}
+                className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-500 hover:-translate-y-2"
               >
                 <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
                   <feature.icon className="h-8 w-8 text-white" />
@@ -204,9 +193,9 @@ const Index = () => {
       </section>
 
       {/* How it works */}
-      <section ref={howItWorksRef.ref} className="relative z-10 container mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
+      <section className="relative z-10 container mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
         <div className="max-w-5xl mx-auto">
-          <div className={`text-center mb-16 transition-all duration-700 ${howItWorksRef.isVisible ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-10'}`}>
+          <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 How It Works
@@ -240,13 +229,7 @@ const Index = () => {
             ].map((step, index) => (
               <div 
                 key={index}
-                className={`flex gap-6 items-start p-8 rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/50 hover:border-primary/50 transition-all duration-500 hover:scale-105 ${
-                  howItWorksRef.isVisible ? 'animate-slide-in-right opacity-100' : 'opacity-0 translate-x-10'
-                }`}
-                style={{ 
-                  transitionDelay: `${index * 0.2}s`,
-                  animationDelay: howItWorksRef.isVisible ? `${index * 0.2}s` : '0s'
-                }}
+                className="flex gap-6 items-start p-8 rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/50 hover:border-primary/50 transition-all duration-500 hover:scale-105"
               >
                 <div className="flex-shrink-0">
                   <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-glow">
@@ -267,10 +250,10 @@ const Index = () => {
       </section>
 
       {/* Benefits section */}
-      <section ref={benefitsRef.ref} className="relative z-10 container mx-auto px-6 py-20">
+      <section className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-3xl mx-auto">
-            <div className={`space-y-8 text-center transition-all duration-700 ${benefitsRef.isVisible ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-10'}`}>
+            <div className="space-y-8 text-center">
               <h2 className="text-4xl md:text-5xl font-bold leading-tight">
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Built for Students & Teachers
@@ -297,13 +280,7 @@ const Index = () => {
                 ].map((benefit, index) => (
                   <div 
                     key={index} 
-                    className={`flex gap-4 items-start text-left max-w-xl mx-auto transition-all duration-500 hover:scale-105 ${
-                      benefitsRef.isVisible ? 'animate-fade-in opacity-100' : 'opacity-0'
-                    }`}
-                    style={{ 
-                      transitionDelay: `${index * 0.15}s`,
-                      animationDelay: benefitsRef.isVisible ? `${index * 0.15}s` : '0s'
-                    }}
+                    className="flex gap-4 items-start text-left max-w-xl mx-auto transition-all duration-500 hover:scale-105"
                   >
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <benefit.icon className="h-6 w-6 text-primary" />
@@ -321,11 +298,9 @@ const Index = () => {
       </section>
 
       {/* CTA section */}
-      <section ref={ctaRef.ref} className="relative z-10 container mx-auto px-6 py-20">
+      <section className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-4xl mx-auto">
-          <div className={`relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 p-12 md:p-16 text-center backdrop-blur-sm shadow-glow transition-all duration-700 hover:scale-105 ${
-            ctaRef.isVisible ? 'animate-bounce-in opacity-100' : 'opacity-0 scale-90'
-          }`}>
+          <div className="relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 p-12 md:p-16 text-center backdrop-blur-sm shadow-glow transition-all duration-700 hover:scale-105">
             <div className="space-y-6">
               <h2 className="text-4xl md:text-5xl font-bold">
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
