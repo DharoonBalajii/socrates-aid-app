@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { 
   GraduationCap, 
   BookOpen, 
@@ -22,6 +23,10 @@ import {
 const Index = () => {
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
+  const featuresRef = useScrollAnimation();
+  const howItWorksRef = useScrollAnimation();
+  const benefitsRef = useScrollAnimation();
+  const ctaRef = useScrollAnimation();
 
   useEffect(() => {
     if (!loading && user && profile) {
@@ -123,9 +128,9 @@ const Index = () => {
       </section>
 
       {/* Features section */}
-      <section className="relative z-10 container mx-auto px-6 py-20">
+      <section ref={featuresRef.ref} className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16 animate-fade-in">
+          <div className={`text-center mb-16 transition-all duration-700 ${featuresRef.isVisible ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-10'}`}>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Why Choose StemPal?
@@ -177,10 +182,15 @@ const Index = () => {
             ].map((feature, index) => (
               <div 
                 key={index}
-                className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-300 hover:-translate-y-2 animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className={`group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-500 hover:-translate-y-2 ${
+                  featuresRef.isVisible ? 'animate-scale-in opacity-100' : 'opacity-0 scale-95'
+                }`}
+                style={{ 
+                  animationDelay: featuresRef.isVisible ? `${index * 0.1}s` : '0s',
+                  transitionDelay: `${index * 0.1}s`
+                }}
               >
-                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300`}>
                   <feature.icon className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="font-bold text-xl mb-3">{feature.title}</h3>
@@ -194,9 +204,9 @@ const Index = () => {
       </section>
 
       {/* How it works */}
-      <section className="relative z-10 container mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
+      <section ref={howItWorksRef.ref} className="relative z-10 container mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
+          <div className={`text-center mb-16 transition-all duration-700 ${howItWorksRef.isVisible ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-10'}`}>
             <h2 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 How It Works
@@ -230,17 +240,22 @@ const Index = () => {
             ].map((step, index) => (
               <div 
                 key={index}
-                className="flex gap-6 items-start p-8 rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-300 animate-fade-in"
-                style={{ animationDelay: `${index * 0.2}s` }}
+                className={`flex gap-6 items-start p-8 rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/50 hover:border-primary/50 transition-all duration-500 hover:scale-105 ${
+                  howItWorksRef.isVisible ? 'animate-slide-in-right opacity-100' : 'opacity-0 translate-x-10'
+                }`}
+                style={{ 
+                  transitionDelay: `${index * 0.2}s`,
+                  animationDelay: howItWorksRef.isVisible ? `${index * 0.2}s` : '0s'
+                }}
               >
                 <div className="flex-shrink-0">
-                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground">
+                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground shadow-glow">
                     {step.step}
                   </div>
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
-                    <step.icon className="h-6 w-6 text-primary" />
+                    <step.icon className="h-6 w-6 text-primary animate-pulse" />
                     <h3 className="text-2xl font-bold">{step.title}</h3>
                   </div>
                   <p className="text-lg text-muted-foreground">{step.description}</p>
@@ -252,10 +267,10 @@ const Index = () => {
       </section>
 
       {/* Benefits section */}
-      <section className="relative z-10 container mx-auto px-6 py-20">
+      <section ref={benefitsRef.ref} className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-6xl mx-auto">
           <div className="max-w-3xl mx-auto">
-            <div className="space-y-8 animate-fade-in text-center">
+            <div className={`space-y-8 text-center transition-all duration-700 ${benefitsRef.isVisible ? 'animate-slide-up opacity-100' : 'opacity-0 translate-y-10'}`}>
               <h2 className="text-4xl md:text-5xl font-bold leading-tight">
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Built for Students & Teachers
@@ -280,8 +295,17 @@ const Index = () => {
                     description: 'Focus on learning concepts, not just getting answers'
                   }
                 ].map((benefit, index) => (
-                  <div key={index} className="flex gap-4 items-start text-left max-w-xl mx-auto">
-                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div 
+                    key={index} 
+                    className={`flex gap-4 items-start text-left max-w-xl mx-auto transition-all duration-500 hover:scale-105 ${
+                      benefitsRef.isVisible ? 'animate-fade-in opacity-100' : 'opacity-0'
+                    }`}
+                    style={{ 
+                      transitionDelay: `${index * 0.15}s`,
+                      animationDelay: benefitsRef.isVisible ? `${index * 0.15}s` : '0s'
+                    }}
+                  >
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
                       <benefit.icon className="h-6 w-6 text-primary" />
                     </div>
                     <div>
@@ -297,9 +321,11 @@ const Index = () => {
       </section>
 
       {/* CTA section */}
-      <section className="relative z-10 container mx-auto px-6 py-20">
+      <section ref={ctaRef.ref} className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-4xl mx-auto">
-          <div className="relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 p-12 md:p-16 text-center backdrop-blur-sm shadow-glow animate-fade-in">
+          <div className={`relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 p-12 md:p-16 text-center backdrop-blur-sm shadow-glow transition-all duration-700 hover:scale-105 ${
+            ctaRef.isVisible ? 'animate-bounce-in opacity-100' : 'opacity-0 scale-90'
+          }`}>
             <div className="space-y-6">
               <h2 className="text-4xl md:text-5xl font-bold">
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
@@ -312,7 +338,7 @@ const Index = () => {
               <Button
                 onClick={() => navigate('/auth')}
                 size="lg"
-                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-10 py-7 rounded-2xl shadow-glow transition-smooth hover-scale"
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-10 py-7 rounded-2xl shadow-glow transition-smooth hover-scale animate-pulse-slow"
               >
                 Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
@@ -325,7 +351,7 @@ const Index = () => {
       <footer className="relative z-10 border-t border-border/50 py-12 mt-20 bg-card/30 backdrop-blur-sm">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 hover-scale cursor-pointer" onClick={() => navigate('/')}>
               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                 <GraduationCap className="h-6 w-6 text-primary-foreground" />
               </div>
@@ -334,7 +360,7 @@ const Index = () => {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              © 2024 StemPal. Powered by Lovable Cloud & AI.
+              © 2024 StemPal
             </p>
           </div>
         </div>
