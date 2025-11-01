@@ -57,38 +57,6 @@ serve(async (req) => {
       });
     }
 
-    // Prepare messages for Gemini
-    const messagesForAI = chatMessages?.map((msg: any) => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    })) || [];
-
-    // Add current message
-    const currentMessageParts: any[] = [{ text: message }];
-    if (imageUrl) {
-      // Extract base64 data
-      const base64Data = imageUrl.split(',')[1];
-      const mimeType = imageUrl.split(';')[0].split(':')[1];
-      
-      currentMessageParts.push({
-        inlineData: {
-          mimeType: mimeType,
-          data: base64Data
-        }
-      });
-    }
-
-    messagesForAI.push({
-      role: 'user',
-      parts: currentMessageParts
-    });
-
-    // Call Lovable AI with Gemini
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
-    }
-
     const systemPrompt = `You are Socrates, an AI learning assistant for StemPal. Your goal is to help students understand concepts deeply through the Socratic method - asking guiding questions and providing explanations that build understanding.
 
 When students upload homework problems:
@@ -102,32 +70,71 @@ ${contextPrompt}
 
 Be encouraging, patient, and focus on helping students learn, not just giving answers.`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messagesForAI.map((msg: any) => ({
-            role: msg.role === 'model' ? 'assistant' : 'user',
-            content: msg.parts.map((p: any) => p.text || '[image]').join(' ')
-          }))
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      throw new Error('AI processing failed');
+    // Prepare messages for Gemini
+    const contents: any[] = [];
+    
+    // Add chat history
+    if (chatMessages && chatMessages.length > 0) {
+      chatMessages.forEach((msg: any) => {
+        contents.push({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{ text: msg.content }]
+        });
+      });
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices[0].message.content;
+    // Add current message with optional image
+    const currentMessageParts: any[] = [{ text: systemPrompt + '\n\nUser: ' + message }];
+    if (imageUrl) {
+      const base64Data = imageUrl.split(',')[1];
+      const mimeType = imageUrl.split(';')[0].split(':')[1];
+      
+      currentMessageParts.push({
+        inline_data: {
+          mime_type: mimeType,
+          data: base64Data
+        }
+      });
+    }
+
+    contents.push({
+      role: 'user',
+      parts: currentMessageParts
+    });
+
+    // Call Gemini API directly
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY not configured');
+    }
+
+    const geminiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: contents,
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+          },
+        }),
+      }
+    );
+
+    if (!geminiResponse.ok) {
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', geminiResponse.status, errorText);
+      throw new Error(`Gemini API failed: ${geminiResponse.status}`);
+    }
+
+    const geminiData = await geminiResponse.json();
+    const aiResponse = geminiData.candidates[0].content.parts[0].text;
 
     // Save AI response to database
     await supabaseClient
@@ -154,8 +161,8 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
         .eq('id', chatId);
     }
 
-    // Track common struggles
-    const topicKeywords = extractTopics(message);
+    // Track common struggles for teacher dashboard
+    const topicKeywords = extractTopics(message + ' ' + aiResponse);
     if (topicKeywords.length > 0) {
       for (const topic of topicKeywords) {
         const { data: existingStruggle } = await supabaseClient
@@ -170,6 +177,7 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
             .update({
               student_count: existingStruggle.student_count + 1,
               last_asked: new Date().toISOString(),
+              question_summary: message.slice(0, 100),
             })
             .eq('id', existingStruggle.id);
         } else {
@@ -203,15 +211,19 @@ function extractTopics(text: string): string[] {
   const commonTopics = [
     'algebra', 'geometry', 'calculus', 'physics', 'chemistry', 'biology',
     'trigonometry', 'statistics', 'probability', 'equations', 'functions',
-    'derivatives', 'integrals', 'vectors', 'matrices'
+    'derivatives', 'integrals', 'vectors', 'matrices', 'stoichiometry',
+    'kinematics', 'thermodynamics', 'electromagnetism', 'optics', 'waves',
+    'polynomials', 'logarithms', 'exponentials', 'limits', 'series'
   ];
 
   const lowerText = text.toLowerCase();
+  const foundTopics = new Set<string>();
+  
   commonTopics.forEach(topic => {
     if (lowerText.includes(topic)) {
-      topics.push(topic.charAt(0).toUpperCase() + topic.slice(1));
+      foundTopics.add(topic.charAt(0).toUpperCase() + topic.slice(1));
     }
   });
 
-  return topics.slice(0, 2); // Return max 2 topics
+  return Array.from(foundTopics).slice(0, 3); // Return max 3 topics
 }
