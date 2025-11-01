@@ -48,6 +48,7 @@ const TeacherDashboard = () => {
   const [description, setDescription] = useState('');
   const [uploadedFile, setUploadedFile] = useState<{ url: string; name: string } | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showUploadSection, setShowUploadSection] = useState(false);
 
   useEffect(() => {
     loadStruggles();
@@ -172,81 +173,98 @@ const TeacherDashboard = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8 space-y-8">
-        <Card className="shadow-soft border-border/50">
-          <CardHeader>
-            <CardTitle>Upload Learning Resources</CardTitle>
-            <CardDescription>
-              Upload PDFs and documents that students can reference. The AI will use these to guide students.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Subject</label>
-                <Select value={subject} onValueChange={setSubject}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select subject" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SUBJECTS.map((s) => (
-                      <SelectItem key={s} value={s}>{s}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">Manage Learning Resources</h2>
+            <p className="text-sm text-muted-foreground">Upload and manage materials for your students</p>
+          </div>
+          <Button
+            onClick={() => setShowUploadSection(!showUploadSection)}
+            variant={showUploadSection ? "outline" : "default"}
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            {showUploadSection ? 'Hide Upload Form' : 'Upload Learning Resources'}
+          </Button>
+        </div>
+
+        {showUploadSection && (
+          <Card className="shadow-soft border-border/50 animate-fade-in">
+            <CardHeader>
+              <CardTitle>Upload Learning Resources</CardTitle>
+              <CardDescription>
+                Upload PDFs and documents that students can reference. The AI will use these to guide students.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Subject</label>
+                  <Select value={subject} onValueChange={setSubject}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subject" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SUBJECTS.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Title</label>
+                  <Input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Chapter 3 - Binary Trees"
+                  />
+                </div>
               </div>
-              
+
               <div className="space-y-2">
-                <label className="text-sm font-medium">Title</label>
-                <Input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Chapter 3 - Binary Trees"
+                <label className="text-sm font-medium">Description (optional)</label>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Brief description of what this resource covers..."
+                  rows={3}
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Description (optional)</label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Brief description of what this resource covers..."
-                rows={3}
-              />
-            </div>
+              <div
+                {...getRootProps()}
+                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+                  isDragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary'
+                }`}
+              >
+                <input {...getInputProps()} />
+                {uploadedFile ? (
+                  <div className="flex items-center justify-center gap-2 text-primary">
+                    <FileText className="h-5 w-5" />
+                    <span className="font-medium">{uploadedFile.name}</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Drag & drop a document, or click to browse
+                    </p>
+                    <p className="text-xs text-muted-foreground">PDF, DOC, DOCX</p>
+                  </div>
+                )}
+              </div>
 
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                isDragActive ? 'border-primary bg-accent' : 'border-border hover:border-primary'
-              }`}
-            >
-              <input {...getInputProps()} />
-              {uploadedFile ? (
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <FileText className="h-5 w-5" />
-                  <span className="font-medium">{uploadedFile.name}</span>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Drag & drop a document, or click to browse
-                  </p>
-                  <p className="text-xs text-muted-foreground">PDF, DOC, DOCX</p>
-                </div>
-              )}
-            </div>
-
-            <Button 
-              onClick={handleUploadResource} 
-              disabled={isUploading}
-              className="w-full"
-            >
-              {isUploading ? 'Uploading...' : 'Upload Resource'}
-            </Button>
-          </CardContent>
-        </Card>
+              <Button 
+                onClick={handleUploadResource} 
+                disabled={isUploading}
+                className="w-full"
+              >
+                {isUploading ? 'Uploading...' : 'Upload Resource'}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card className="shadow-soft border-border/50">
           <CardHeader>
