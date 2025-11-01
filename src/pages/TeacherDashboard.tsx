@@ -298,7 +298,7 @@ const TeacherDashboard = () => {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           <Card className="shadow-soft border-border/50">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -308,20 +308,6 @@ const TeacherDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-primary">{struggles.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-soft border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-destructive" />
-                High Priority Issues
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-destructive">
-                {struggles.filter(s => s.student_count >= 3).length}
-              </div>
             </CardContent>
           </Card>
 
