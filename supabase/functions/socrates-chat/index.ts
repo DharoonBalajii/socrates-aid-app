@@ -15,21 +15,37 @@ serve(async (req) => {
   try {
     const { message, imageUrl, chatId } = await req.json();
     
+    // Get authorization header (case-insensitive)
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    console.log('Auth header present:', !!authHeader);
+    
+    if (!authHeader) {
+      throw new Error('No authorization header provided');
+    }
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
       {
         global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
+          headers: { Authorization: authHeader },
         },
       }
     );
 
     // Get user
-    const { data: { user } } = await supabaseClient.auth.getUser();
-    if (!user) {
-      throw new Error('Unauthorized');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    
+    if (userError) {
+      console.error('User auth error:', userError);
+      throw new Error(`Authentication failed: ${userError.message}`);
     }
+    
+    if (!user) {
+      throw new Error('No user found');
+    }
+    
+    console.log('User authenticated:', user.id);
 
     // Get chat history
     const { data: chatMessages } = await supabaseClient
