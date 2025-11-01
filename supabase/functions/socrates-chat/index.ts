@@ -15,47 +15,37 @@ serve(async (req) => {
   try {
     const { message, imageUrl, chatId } = await req.json();
     
-    // Get authorization header (case-insensitive)
-    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
-    console.log('Auth header present:', !!authHeader);
-    
-    if (!authHeader) {
-      throw new Error('No authorization header provided');
-    }
-    
-    const supabaseClient = createClient(
+    // Create Supabase client for database operations
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Get user
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-    
-    if (userError) {
-      console.error('User auth error:', userError);
-      throw new Error(`Authentication failed: ${userError.message}`);
+    // Get user from JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
     }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
-    if (!user) {
-      throw new Error('No user found');
+    if (authError || !user) {
+      console.error('Auth error:', authError);
+      throw new Error('Unauthorized');
     }
     
     console.log('User authenticated:', user.id);
 
     // Get chat history
-    const { data: chatMessages } = await supabaseClient
+    const { data: chatMessages } = await supabaseAdmin
       .from('messages')
       .select('*')
       .eq('chat_id', chatId)
       .order('created_at', { ascending: true });
 
     // Get user's subject notes
-    const { data: subjects } = await supabaseClient
+    const { data: subjects } = await supabaseAdmin
       .from('subjects')
       .select('id, name, subject_notes(*)')
       .eq('user_id', user.id);
@@ -153,7 +143,7 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
     const aiResponse = geminiData.candidates[0].content.parts[0].text;
 
     // Save AI response to database
-    await supabaseClient
+    await supabaseAdmin
       .from('messages')
       .insert({
         chat_id: chatId,
@@ -163,7 +153,7 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
       });
 
     // Update chat title if it's still "New Chat"
-    const { data: chat } = await supabaseClient
+    const { data: chat } = await supabaseAdmin
       .from('chats')
       .select('title')
       .eq('id', chatId)
@@ -171,7 +161,7 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
 
     if (chat?.title === 'New Chat') {
       const titleSummary = message.slice(0, 50) + (message.length > 50 ? '...' : '');
-      await supabaseClient
+      await supabaseAdmin
         .from('chats')
         .update({ title: titleSummary })
         .eq('id', chatId);
@@ -181,14 +171,14 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
     const topicKeywords = extractTopics(message + ' ' + aiResponse);
     if (topicKeywords.length > 0) {
       for (const topic of topicKeywords) {
-        const { data: existingStruggle } = await supabaseClient
+        const { data: existingStruggle } = await supabaseAdmin
           .from('student_struggles')
           .select('*')
           .eq('topic', topic)
           .maybeSingle();
 
         if (existingStruggle) {
-          await supabaseClient
+          await supabaseAdmin
             .from('student_struggles')
             .update({
               student_count: existingStruggle.student_count + 1,
@@ -197,7 +187,7 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
             })
             .eq('id', existingStruggle.id);
         } else {
-          await supabaseClient
+          await supabaseAdmin
             .from('student_struggles')
             .insert({
               topic: topic,
