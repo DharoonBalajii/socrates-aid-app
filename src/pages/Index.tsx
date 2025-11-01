@@ -254,8 +254,8 @@ const Index = () => {
       {/* Benefits section */}
       <section className="relative z-10 container mx-auto px-6 py-20">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8 animate-fade-in">
+          <div className="max-w-3xl mx-auto">
+            <div className="space-y-8 animate-fade-in text-center">
               <h2 className="text-4xl md:text-5xl font-bold leading-tight">
                 <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   Built for Students & Teachers
@@ -280,7 +280,7 @@ const Index = () => {
                     description: 'Focus on learning concepts, not just getting answers'
                   }
                 ].map((benefit, index) => (
-                  <div key={index} className="flex gap-4 items-start">
+                  <div key={index} className="flex gap-4 items-start text-left max-w-xl mx-auto">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <benefit.icon className="h-6 w-6 text-primary" />
                     </div>
@@ -290,40 +290,6 @@ const Index = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-
-            <div className="relative animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 to-accent/20 p-8 backdrop-blur-sm">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <Users className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold">10K+</div>
-                      <div className="text-sm text-muted-foreground">Students Helped</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center">
-                      <BookOpen className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold">500+</div>
-                      <div className="text-sm text-muted-foreground">Teachers Using</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <TrendingUp className="h-6 w-6 text-primary-foreground" />
-                    </div>
-                    <div>
-                      <div className="text-3xl font-bold">95%</div>
-                      <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
