@@ -154,13 +154,8 @@ const StudentChat = () => {
 
     // Call Socrates AI
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
       const { data, error } = await supabase.functions.invoke('socrates-chat', {
         body: { message: input, imageUrl: uploadedImage, chatId: currentChat },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
       });
 
       if (error) throw error;
