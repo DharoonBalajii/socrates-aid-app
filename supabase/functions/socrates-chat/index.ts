@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, imageUrl, chatId } = await req.json();
+    const { message, imageUrl, chatId, documentUrl, documentName } = await req.json();
     
     // Create Supabase client for database operations
     const supabaseAdmin = createClient(
@@ -44,15 +44,52 @@ serve(async (req) => {
       .eq('chat_id', chatId)
       .order('created_at', { ascending: true });
 
+    // Get user's profile to find their subjects
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('class_number')
+      .eq('id', user.id)
+      .single();
+
     // Get user's subject notes
     const { data: subjects } = await supabaseAdmin
       .from('subjects')
       .select('id, name, subject_notes(*)')
       .eq('user_id', user.id);
 
+    // Get teacher-uploaded resources for relevant subjects
+    let subjectList: string[] = [];
+    if (profile?.class_number) {
+      try {
+        subjectList = JSON.parse(profile.class_number);
+      } catch (e) {
+        subjectList = [profile.class_number];
+      }
+    }
+
+    const { data: teacherResources } = await supabaseAdmin
+      .from('teacher_resources')
+      .select('*')
+      .in('subject', subjectList);
+
     let contextPrompt = '';
+    
+    // Add teacher resources context
+    if (teacherResources && teacherResources.length > 0) {
+      contextPrompt += '\n\nTEACHER-PROVIDED LEARNING RESOURCES:\n';
+      contextPrompt += 'When answering questions, reference these materials and tell students which document to check:\n\n';
+      teacherResources.forEach((resource: any) => {
+        contextPrompt += `📚 "${resource.title}" (${resource.subject})\n`;
+        if (resource.description) {
+          contextPrompt += `   Description: ${resource.description}\n`;
+        }
+        contextPrompt += `   Document: ${resource.document_name}\n\n`;
+      });
+    }
+    
+    // Add student's own notes
     if (subjects && subjects.length > 0) {
-      contextPrompt = '\n\nStudent\'s uploaded notes and materials:\n';
+      contextPrompt += '\n\nStudent\'s uploaded notes and materials:\n';
       subjects.forEach((subject: any) => {
         if (subject.subject_notes && subject.subject_notes.length > 0) {
           contextPrompt += `\n${subject.name}:\n`;
@@ -65,16 +102,19 @@ serve(async (req) => {
 
     const systemPrompt = `You are Socrates, an AI learning assistant for StemPal. Your goal is to help students understand concepts deeply through the Socratic method - asking guiding questions and providing explanations that build understanding.
 
-When students upload homework problems:
+When students upload homework problems or documents:
 1. Analyze the problem carefully
-2. Break it down into steps
-3. Guide the student through the solution with questions
-4. Provide clear explanations
-5. Encourage follow-up questions
+2. If the student uploaded a document, acknowledge it and offer to help with it
+3. Break down problems into steps
+4. Guide the student through the solution with questions
+5. **IMPORTANT**: When teacher resources are available, ALWAYS reference them by name and tell students: "You can find more details about this in [Document Name]"
+6. If a method or approach is shown in the teacher's materials, use that SAME method and reference where students can learn it
+7. Highlight specific sections or topics the student should review in the teacher's documents
+8. Provide clear explanations while encouraging students to check the referenced materials for deeper understanding
 
 ${contextPrompt}
 
-Be encouraging, patient, and focus on helping students learn, not just giving answers.`;
+Be encouraging, patient, and focus on helping students learn, not just giving answers. ALWAYS direct students to the relevant teacher-uploaded resources when available.`;
 
     // Prepare messages for Gemini
     const contents: any[] = [];
@@ -89,8 +129,13 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
       });
     }
 
-    // Add current message with optional image
-    const currentMessageParts: any[] = [{ text: systemPrompt + '\n\nUser: ' + message }];
+    // Add current message with optional image and document
+    let fullMessage = message;
+    if (documentName) {
+      fullMessage += `\n\n[Student uploaded document: ${documentName}]`;
+    }
+    
+    const currentMessageParts: any[] = [{ text: systemPrompt + '\n\nUser: ' + fullMessage }];
     if (imageUrl) {
       const base64Data = imageUrl.split(',')[1];
       const mimeType = imageUrl.split(';')[0].split(':')[1];
@@ -150,6 +195,8 @@ Be encouraging, patient, and focus on helping students learn, not just giving an
         user_id: user.id,
         role: 'assistant',
         content: aiResponse,
+        document_url: documentUrl || null,
+        document_name: documentName || null,
       });
 
     // Update chat title if it's still "New Chat"
