@@ -1,0 +1,28 @@
+# Supabase Database Connection
+supabase==2.10.0
+python-dotenv==1.0.1
+
+# Data Processing and Analysis
+pandas==2.2.0
+numpy==1.26.3
+
+# Data Visualization
+matplotlib==3.8.2
+seaborn==0.13.2
+plotly==5.18.0
+
+# Machine Learning
+scikit-learn==1.4.0
+
+# Report Generation
+reportlab==4.1.0
+jinja2==3.1.3
+
+# Statistical Analysis
+scipy==1.12.0
+
+# Database
+psycopg2-binary==2.9.9
+
+# Utilities
+python-dateutil==2.8.2
