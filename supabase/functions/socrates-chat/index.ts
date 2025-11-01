@@ -61,9 +61,10 @@ serve(async (req) => {
     let subjectList: string[] = [];
     if (profile?.class_number) {
       try {
-        subjectList = JSON.parse(profile.class_number);
+        const parsed = JSON.parse(profile.class_number);
+        subjectList = Array.isArray(parsed) ? parsed : [String(parsed)];
       } catch (e) {
-        subjectList = [profile.class_number];
+        subjectList = [String(profile.class_number)];
       }
     }
 
