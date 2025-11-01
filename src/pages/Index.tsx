@@ -2,7 +2,22 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { GraduationCap, BookOpen, Users, Sparkles } from 'lucide-react';
+import { 
+  GraduationCap, 
+  BookOpen, 
+  Users, 
+  Sparkles, 
+  Brain, 
+  Upload, 
+  MessageSquare, 
+  Target,
+  Zap,
+  Shield,
+  TrendingUp,
+  FileText,
+  CheckCircle2,
+  ArrowRight
+} from 'lucide-react';
 
 const Index = () => {
   const { user, profile, loading } = useAuth();
@@ -31,82 +46,331 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-primary/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+      </div>
+
+      {/* Navigation */}
+      <nav className="relative z-20 border-b border-border/50 backdrop-blur-sm bg-background/80">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+              <GraduationCap className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              StemPal
+            </span>
+          </div>
+          <Button
+            onClick={() => navigate('/auth')}
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth"
+          >
+            Sign In
+          </Button>
+        </div>
+      </nav>
       
       {/* Hero section */}
-      <div className="relative z-10 container mx-auto px-6 py-20">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <div className="h-24 w-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow animate-float">
-              <GraduationCap className="h-12 w-12 text-primary-foreground" />
-            </div>
-          </div>
-
-          {/* Main heading */}
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
-                Meet Socrates
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto">
-              Your AI-powered learning companion that helps you master STEM subjects through guided discovery
-            </p>
-          </div>
-
-          {/* CTA Button */}
-          <div className="flex justify-center pt-8">
-            <Button
-              onClick={() => navigate('/auth')}
-              size="lg"
-              className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-8 py-6 rounded-2xl shadow-glow transition-smooth"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Get Started Free
-            </Button>
-          </div>
-
-          {/* Features grid */}
-          <div className="grid md:grid-cols-3 gap-6 pt-16">
-            <div className="p-6 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-smooth">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                <BookOpen className="h-6 w-6 text-primary" />
+      <section className="relative z-10 container mx-auto px-6 py-20 md:py-32">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-8 animate-fade-in">
+            {/* Logo */}
+            <div className="flex justify-center mb-8">
+              <div className="h-28 w-28 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow animate-float">
+                <GraduationCap className="h-14 w-14 text-primary-foreground" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Smart Problem Solving</h3>
-              <p className="text-sm text-muted-foreground">
-                Upload homework images and get step-by-step guidance through the Socratic method
+            </div>
+
+            {/* Main heading */}
+            <div className="space-y-6">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-tight">
+                <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
+                  Meet Socrates
+                </span>
+              </h1>
+              <p className="text-xl md:text-3xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Your AI-powered learning companion that transforms STEM education through{' '}
+                <span className="text-primary font-semibold">guided discovery</span> and{' '}
+                <span className="text-accent font-semibold">intelligent tutoring</span>
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-smooth">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                <GraduationCap className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Personalized Learning</h3>
-              <p className="text-sm text-muted-foreground">
-                Upload your notes and materials for answers tailored to your curriculum
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-smooth">
-              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 mx-auto">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="font-semibold text-lg mb-2">Teacher Insights</h3>
-              <p className="text-sm text-muted-foreground">
-                Identify common struggles across students to improve classroom focus
-              </p>
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-8">
+              <Button
+                onClick={() => navigate('/auth')}
+                size="lg"
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-10 py-7 rounded-2xl shadow-glow transition-smooth hover-scale"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Start Learning Free
+              </Button>
+              <Button
+                onClick={() => navigate('/auth')}
+                size="lg"
+                variant="outline"
+                className="text-lg px-10 py-7 rounded-2xl border-primary/30 hover:bg-primary/10 transition-smooth"
+              >
+                <Users className="mr-2 h-5 w-5" />
+                For Teachers
+              </Button>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Features section */}
+      <section className="relative z-10 container mx-auto px-6 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16 animate-fade-in">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Why Choose StemPal?
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Powered by advanced AI to make learning engaging, effective, and personalized
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Brain,
+                title: 'Socratic Method',
+                description: 'Learn through guided questions that build deep understanding, not just answers',
+                gradient: 'from-purple-500 to-pink-500'
+              },
+              {
+                icon: Upload,
+                title: 'Upload & Learn',
+                description: 'Submit homework images, PDFs, or documents and get instant, personalized help',
+                gradient: 'from-blue-500 to-cyan-500'
+              },
+              {
+                icon: MessageSquare,
+                title: 'Interactive Chat',
+                description: 'Have natural conversations with your AI tutor available 24/7',
+                gradient: 'from-green-500 to-emerald-500'
+              },
+              {
+                icon: FileText,
+                title: 'Custom Resources',
+                description: 'Upload your notes and textbooks for answers tailored to your curriculum',
+                gradient: 'from-orange-500 to-red-500'
+              },
+              {
+                icon: Target,
+                title: 'Teacher Dashboard',
+                description: 'Track student progress and identify common learning challenges',
+                gradient: 'from-indigo-500 to-purple-500'
+              },
+              {
+                icon: TrendingUp,
+                title: 'Adaptive Learning',
+                description: 'AI adjusts to your learning pace and references teacher materials',
+                gradient: 'from-pink-500 to-rose-500'
+              }
+            ].map((feature, index) => (
+              <div 
+                key={index}
+                className="group p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm shadow-soft hover:shadow-glow transition-all duration-300 hover:-translate-y-2 animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <feature.icon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="font-bold text-xl mb-3">{feature.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="relative z-10 container mx-auto px-6 py-20 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                How It Works
+              </span>
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Get started in three simple steps
+            </p>
+          </div>
+
+          <div className="space-y-8">
+            {[
+              {
+                step: '01',
+                title: 'Upload Your Question',
+                description: 'Take a photo of your homework, upload a PDF, or type your question directly',
+                icon: Upload
+              },
+              {
+                step: '02',
+                title: 'Get Guided Help',
+                description: 'Socrates analyzes your question and guides you through the solution with questions',
+                icon: MessageSquare
+              },
+              {
+                step: '03',
+                title: 'Master the Concept',
+                description: 'Understand the underlying principles and learn to solve similar problems independently',
+                icon: CheckCircle2
+              }
+            ].map((step, index) => (
+              <div 
+                key={index}
+                className="flex gap-6 items-start p-8 rounded-3xl border border-border/50 bg-card/30 backdrop-blur-sm hover:bg-card/50 transition-all duration-300 animate-fade-in"
+                style={{ animationDelay: `${index * 0.2}s` }}
+              >
+                <div className="flex-shrink-0">
+                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-2xl font-bold text-primary-foreground">
+                    {step.step}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-3">
+                    <step.icon className="h-6 w-6 text-primary" />
+                    <h3 className="text-2xl font-bold">{step.title}</h3>
+                  </div>
+                  <p className="text-lg text-muted-foreground">{step.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits section */}
+      <section className="relative z-10 container mx-auto px-6 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 animate-fade-in">
+              <h2 className="text-4xl md:text-5xl font-bold leading-tight">
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Built for Students & Teachers
+                </span>
+              </h2>
+              
+              <div className="space-y-6">
+                {[
+                  {
+                    icon: Zap,
+                    title: 'Instant Help',
+                    description: 'Get help whenever you need it, no waiting for tutors'
+                  },
+                  {
+                    icon: Shield,
+                    title: 'Safe & Secure',
+                    description: 'Your data is protected with enterprise-grade security'
+                  },
+                  {
+                    icon: Brain,
+                    title: 'Deep Understanding',
+                    description: 'Focus on learning concepts, not just getting answers'
+                  }
+                ].map((benefit, index) => (
+                  <div key={index} className="flex gap-4 items-start">
+                    <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <benefit.icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg mb-1">{benefit.title}</h3>
+                      <p className="text-muted-foreground">{benefit.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 to-accent/20 p-8 backdrop-blur-sm">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <Users className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold">10K+</div>
+                      <div className="text-sm text-muted-foreground">Students Helped</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+                      <BookOpen className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold">500+</div>
+                      <div className="text-sm text-muted-foreground">Teachers Using</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                      <TrendingUp className="h-6 w-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <div className="text-3xl font-bold">95%</div>
+                      <div className="text-sm text-muted-foreground">Satisfaction Rate</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA section */}
+      <section className="relative z-10 container mx-auto px-6 py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="relative rounded-3xl border border-border/50 bg-gradient-to-br from-primary/20 via-accent/10 to-primary/20 p-12 md:p-16 text-center backdrop-blur-sm shadow-glow animate-fade-in">
+            <div className="space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold">
+                <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  Ready to Transform Your Learning?
+                </span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Join thousands of students already learning smarter with AI-powered guidance
+              </p>
+              <Button
+                onClick={() => navigate('/auth')}
+                size="lg"
+                className="bg-gradient-to-r from-primary to-accent hover:opacity-90 text-lg px-10 py-7 rounded-2xl shadow-glow transition-smooth hover-scale"
+              >
+                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-border/50 py-8 mt-20">
-        <div className="container mx-auto px-6 text-center text-sm text-muted-foreground">
-          <p>© 2024 StemPal. Powered by Lovable Cloud & AI.</p>
+      <footer className="relative z-10 border-t border-border/50 py-12 mt-20 bg-card/30 backdrop-blur-sm">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <GraduationCap className="h-6 w-6 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                StemPal
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              © 2024 StemPal. Powered by Lovable Cloud & AI.
+            </p>
+          </div>
         </div>
       </footer>
     </div>

@@ -127,3 +127,11 @@ All colors MUST be HSL.
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+.hover-scale {
+  @apply transition-transform duration-300 hover:scale-105;
+}
+
+.transition-smooth {
+  transition: var(--transition-smooth);
+}
