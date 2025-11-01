@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { MessageSquare, Send, Image as ImageIcon, LogOut, Upload, Plus } from 'lucide-react';
+import { MessageSquare, Send, Image as ImageIcon, LogOut, Upload, Plus, FileText, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useDropzone } from 'react-dropzone';
 
@@ -15,6 +15,8 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   image_url?: string;
+  document_url?: string;
+  document_name?: string;
   created_at: string;
 }
 
@@ -32,10 +34,11 @@ const StudentChat = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [uploadedDocument, setUploadedDocument] = useState<{ url: string; name: string } | null>(null);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps: getImageRootProps, getInputProps: getImageInputProps, isDragActive: isImageDragActive } = useDropzone({
     accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.webp'] },
     maxFiles: 1,
     onDrop: async (acceptedFiles) => {
@@ -45,6 +48,26 @@ const StudentChat = () => {
         reader.onloadend = () => {
           setUploadedImage(reader.result as string);
           toast({ title: 'Image uploaded', description: 'Your image is ready to send!' });
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+  });
+
+  const { getRootProps: getDocRootProps, getInputProps: getDocInputProps, isDragActive: isDocDragActive } = useDropzone({
+    accept: { 
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+    },
+    maxFiles: 1,
+    onDrop: async (acceptedFiles) => {
+      if (acceptedFiles.length > 0) {
+        const file = acceptedFiles[0];
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setUploadedDocument({ url: reader.result as string, name: file.name });
+          toast({ title: 'Document uploaded', description: `${file.name} is ready to send!` });
         };
         reader.readAsDataURL(file);
       }
@@ -128,7 +151,7 @@ const StudentChat = () => {
   };
 
   const sendMessage = async () => {
-    if (!input.trim() && !uploadedImage) return;
+    if (!input.trim() && !uploadedImage && !uploadedDocument) return;
     if (!currentChat) {
       await createNewChat();
       return;
@@ -145,17 +168,30 @@ const StudentChat = () => {
         role: 'user',
         content: input,
         image_url: uploadedImage,
+        document_url: uploadedDocument?.url,
+        document_name: uploadedDocument?.name,
       })
       .select()
       .single();
 
+    const messageContent = input;
+    const imageData = uploadedImage;
+    const docData = uploadedDocument;
+
     setInput('');
     setUploadedImage(null);
+    setUploadedDocument(null);
 
     // Call Socrates AI
     try {
       const { data, error } = await supabase.functions.invoke('socrates-chat', {
-        body: { message: input, imageUrl: uploadedImage, chatId: currentChat },
+        body: { 
+          message: messageContent, 
+          imageUrl: imageData,
+          documentUrl: docData?.url,
+          documentName: docData?.name,
+          chatId: currentChat 
+        },
       });
 
       if (error) throw error;
@@ -229,26 +265,34 @@ const StudentChat = () => {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                  className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : ''}`}
                 >
-                  <Avatar className={`h-8 w-8 ${msg.role === 'assistant' ? 'border-2 border-primary' : ''}`}>
-                    <AvatarFallback className={msg.role === 'assistant' ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground' : 'bg-secondary'}>
-                      {msg.role === 'assistant' ? 'S' : 'You'}
-                    </AvatarFallback>
-                  </Avatar>
+                  {msg.role === 'assistant' && (
+                    <Avatar className="h-8 w-8 border-2 border-primary flex-shrink-0">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">
+                        S
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-soft ${
+                    className={`max-w-[80%] ${
                       msg.role === 'user'
-                        ? 'bg-gradient-to-br from-primary to-accent text-primary-foreground'
-                        : 'bg-card border border-border/50'
+                        ? 'text-right'
+                        : 'rounded-2xl px-4 py-3 shadow-soft bg-card border border-border/50'
                     }`}
                   >
                     {msg.image_url && (
                       <img
                         src={msg.image_url}
                         alt="Uploaded"
-                        className="rounded-lg mb-2 max-w-full"
+                        className={`rounded-lg mb-2 max-w-full ${msg.role === 'user' ? 'ml-auto' : ''}`}
                       />
+                    )}
+                    {msg.document_url && (
+                      <div className={`flex items-center gap-2 mb-2 p-3 rounded-lg bg-accent/20 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+                        <FileText className="h-5 w-5 text-primary" />
+                        <span className="text-sm font-medium">{msg.document_name}</span>
+                      </div>
                     )}
                     <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                   </div>
@@ -274,29 +318,58 @@ const StudentChat = () => {
 
           <div className="border-t border-border/50 p-4">
             <div className="max-w-3xl mx-auto">
-              {uploadedImage && (
-                <div className="mb-3 relative inline-block">
-                  <img src={uploadedImage} alt="Upload preview" className="h-20 rounded-lg" />
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
-                    onClick={() => setUploadedImage(null)}
-                  >
-                    ×
-                  </Button>
+              {(uploadedImage || uploadedDocument) && (
+                <div className="mb-3 flex gap-2 flex-wrap">
+                  {uploadedImage && (
+                    <div className="relative inline-block">
+                      <img src={uploadedImage} alt="Upload preview" className="h-20 rounded-lg" />
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                        onClick={() => setUploadedImage(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  {uploadedDocument && (
+                    <div className="relative inline-flex items-center gap-2 bg-accent/20 px-3 py-2 rounded-lg">
+                      <FileText className="h-5 w-5 text-primary" />
+                      <span className="text-sm font-medium">{uploadedDocument.name}</span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0 ml-2"
+                        onClick={() => setUploadedDocument(null)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="flex gap-2">
-                <div {...getRootProps()} className="relative">
-                  <input {...getInputProps()} />
+                <div {...getImageRootProps()} className="relative">
+                  <input {...getImageInputProps()} />
                   <Button
                     type="button"
                     variant="outline"
                     size="icon"
-                    className={`transition-smooth ${isDragActive ? 'bg-accent' : ''}`}
+                    className={`transition-smooth ${isImageDragActive ? 'bg-accent' : ''}`}
                   >
                     <ImageIcon className="h-5 w-5" />
+                  </Button>
+                </div>
+                <div {...getDocRootProps()} className="relative">
+                  <input {...getDocInputProps()} />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={`transition-smooth ${isDocDragActive ? 'bg-accent' : ''}`}
+                  >
+                    <FileText className="h-5 w-5" />
                   </Button>
                 </div>
                 <Input
@@ -309,7 +382,7 @@ const StudentChat = () => {
                 />
                 <Button
                   onClick={sendMessage}
-                  disabled={isLoading || (!input.trim() && !uploadedImage)}
+                  disabled={isLoading || (!input.trim() && !uploadedImage && !uploadedDocument)}
                   className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth shadow-soft"
                 >
                   <Send className="h-5 w-5" />
