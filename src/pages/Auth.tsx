@@ -42,11 +42,18 @@ const Auth = () => {
   }, [user, navigate]);
 
   const toggleSubject = (subject: string) => {
-    setSelectedSubjects(prev => 
-      prev.includes(subject) 
-        ? prev.filter(s => s !== subject)
-        : [...prev, subject]
-    );
+    if (role === 'teacher') {
+      // Teachers can only select one subject
+      setSelectedSubjects([subject]);
+      setSubjectsOpen(false);
+    } else {
+      // Students can select multiple subjects
+      setSelectedSubjects(prev => 
+        prev.includes(subject) 
+          ? prev.filter(s => s !== subject)
+          : [...prev, subject]
+      );
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,7 +206,11 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Subjects * (Select at least one)</Label>
+                  <Label>
+                    {role === 'student' 
+                      ? 'Subjects * (Select multiple - you can take up to 5 courses)' 
+                      : 'Subject * (Select one subject you teach)'}
+                  </Label>
                   <Popover open={subjectsOpen} onOpenChange={setSubjectsOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -210,8 +221,10 @@ const Auth = () => {
                         className="w-full justify-between"
                       >
                         {selectedSubjects.length > 0
-                          ? `${selectedSubjects.length} subject${selectedSubjects.length > 1 ? 's' : ''} selected`
-                          : "Select subjects..."}
+                          ? role === 'teacher' 
+                            ? selectedSubjects[0]
+                            : `${selectedSubjects.length} subject${selectedSubjects.length > 1 ? 's' : ''} selected`
+                          : role === 'teacher' ? "Select subject..." : "Select subjects..."}
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </PopoverTrigger>
