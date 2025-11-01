@@ -7,11 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { GraduationCap, Users } from 'lucide-react';
+import { GraduationCap, Users, Check, ChevronsUpDown } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { cn } from '@/lib/utils';
 
 const AVAILABLE_SUBJECTS = [
-  'Mathematics', 'Physics', 'Chemistry', 'Biology', 
-  'Computer Science', 'English', 'History', 'Geography'
+  'Data Structures and Algorithm',
+  'Computational Structures',
+  'Problem Solving using Python',
+  'Operating System',
+  'Technical English',
+  'Engineering Physics',
+  'Applied Chemistry'
 ];
 
 const Auth = () => {
@@ -20,6 +28,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [classNumber, setClassNumber] = useState('');
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [role, setRole] = useState<'student' | 'teacher'>('student');
   const [isSignUp, setIsSignUp] = useState(false);
   const { signUp, signIn, user } = useAuth();
@@ -191,20 +200,69 @@ const Auth = () => {
 
                 <div className="space-y-2">
                   <Label>Subjects * (Select at least one)</Label>
-                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-md">
-                    {AVAILABLE_SUBJECTS.map(subject => (
+                  <Popover open={subjectsOpen} onOpenChange={setSubjectsOpen}>
+                    <PopoverTrigger asChild>
                       <Button
-                        key={subject}
                         type="button"
-                        variant={selectedSubjects.includes(subject) ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => toggleSubject(subject)}
-                        className="justify-start"
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={subjectsOpen}
+                        className="w-full justify-between"
                       >
-                        {subject}
+                        {selectedSubjects.length > 0
+                          ? `${selectedSubjects.length} subject${selectedSubjects.length > 1 ? 's' : ''} selected`
+                          : "Select subjects..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
-                    ))}
-                  </div>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-full p-0 bg-popover z-50" align="start">
+                      <Command className="bg-popover">
+                        <CommandInput placeholder="Search subjects..." />
+                        <CommandList>
+                          <CommandEmpty>No subject found.</CommandEmpty>
+                          <CommandGroup>
+                            {AVAILABLE_SUBJECTS.map((subject) => (
+                              <CommandItem
+                                key={subject}
+                                value={subject}
+                                onSelect={() => {
+                                  toggleSubject(subject);
+                                }}
+                                className="cursor-pointer"
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedSubjects.includes(subject) ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                {subject}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                  {selectedSubjects.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {selectedSubjects.map(subject => (
+                        <div
+                          key={subject}
+                          className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-md flex items-center gap-1"
+                        >
+                          {subject}
+                          <button
+                            type="button"
+                            onClick={() => toggleSubject(subject)}
+                            className="hover:text-primary/80"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
