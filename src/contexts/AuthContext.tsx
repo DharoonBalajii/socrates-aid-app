@@ -8,7 +8,7 @@ interface AuthContextType {
   session: Session | null;
   profile: any | null;
   loading: boolean;
-  signUp: (email: string, password: string, role: 'student' | 'teacher') => Promise<{ error: any }>;
+  signUp: (email: string, password: string, role: 'student' | 'teacher', fullName: string, classNumber: string, subjects: string[]) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 }
@@ -69,19 +69,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, role: 'student' | 'teacher') => {
+  const signUp = async (email: string, password: string, role: 'student' | 'teacher', fullName: string, classNumber: string, subjects: string[]) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          role: role
+          role: role,
+          full_name: fullName,
+          class_number: classNumber
         }
       }
     });
+
+    // If sign-up successful, create subjects for the user
+    if (data.user && !error) {
+      const subjectInserts = subjects.map(subject => ({
+        user_id: data.user.id,
+        name: subject
+      }));
+
+      await supabase.from('subjects').insert(subjectInserts);
+    }
 
     return { error };
   };

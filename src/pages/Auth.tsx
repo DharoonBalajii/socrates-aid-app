@@ -9,9 +9,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { GraduationCap, Users } from 'lucide-react';
 
+const AVAILABLE_SUBJECTS = [
+  'Mathematics', 'Physics', 'Chemistry', 'Biology', 
+  'Computer Science', 'English', 'History', 'Geography'
+];
+
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [classNumber, setClassNumber] = useState('');
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [role, setRole] = useState<'student' | 'teacher'>('student');
   const [isSignUp, setIsSignUp] = useState(false);
   const { signUp, signIn, user } = useAuth();
@@ -23,6 +31,14 @@ const Auth = () => {
       navigate('/');
     }
   }, [user, navigate]);
+
+  const toggleSubject = (subject: string) => {
+    setSelectedSubjects(prev => 
+      prev.includes(subject) 
+        ? prev.filter(s => s !== subject)
+        : [...prev, subject]
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,8 +52,17 @@ const Auth = () => {
       return;
     }
 
+    if (isSignUp && (!fullName || !classNumber || selectedSubjects.length === 0)) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields including name, class number, and at least one subject',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     const { error } = isSignUp 
-      ? await signUp(email, password, role)
+      ? await signUp(email, password, role, fullName, classNumber, selectedSubjects)
       : await signIn(email, password);
 
     if (error) {
@@ -137,8 +162,53 @@ const Auth = () => {
                     </Button>
                   </div>
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="full-name">Full Name *</Label>
+                  <Input
+                    id="full-name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="transition-smooth focus:ring-primary"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="class-number">Class Number *</Label>
+                  <Input
+                    id="class-number"
+                    type="text"
+                    placeholder="10A"
+                    value={classNumber}
+                    onChange={(e) => setClassNumber(e.target.value)}
+                    className="transition-smooth focus:ring-primary"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Subjects * (Select at least one)</Label>
+                  <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 border rounded-md">
+                    {AVAILABLE_SUBJECTS.map(subject => (
+                      <Button
+                        key={subject}
+                        type="button"
+                        variant={selectedSubjects.includes(subject) ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => toggleSubject(subject)}
+                        className="justify-start"
+                      >
+                        {subject}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email *</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -146,10 +216,11 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="transition-smooth focus:ring-primary"
+                    required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password">Password *</Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -157,6 +228,7 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="transition-smooth focus:ring-primary"
+                    required
                   />
                 </div>
                 <Button type="submit" className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-smooth shadow-soft">
