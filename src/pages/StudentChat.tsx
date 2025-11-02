@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { MessageSquare, Send, Image as ImageIcon, LogOut, Upload, Plus, FileText, X } from 'lucide-react';
+import { MessageSquare, Send, Image as ImageIcon, LogOut, Upload, Plus, FileText, X, BookOpen, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useDropzone } from 'react-dropzone';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface Message {
   id: string;
@@ -26,8 +28,18 @@ interface Chat {
   created_at: string;
 }
 
+interface Resource {
+  id: string;
+  title: string;
+  description: string | null;
+  subject: string;
+  document_name: string;
+  document_url: string;
+  created_at: string;
+}
+
 const StudentChat = () => {
-  const { user, signOut } = useAuth();
+  const { user, signOut, profile } = useAuth();
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChat, setCurrentChat] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,6 +47,10 @@ const StudentChat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [uploadedDocument, setUploadedDocument] = useState<{ url: string; name: string } | null>(null);
+  const [showResources, setShowResources] = useState(false);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [selectedSubject, setSelectedSubject] = useState<string>('all');
+  const [userSubjects, setUserSubjects] = useState<string[]>([]);
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +92,8 @@ const StudentChat = () => {
 
   useEffect(() => {
     loadChats();
+    loadUserSubjects();
+    loadResources();
   }, [user]);
 
   useEffect(() => {
@@ -88,6 +106,28 @@ const StudentChat = () => {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const loadUserSubjects = async () => {
+    const { data } = await supabase
+      .from('subjects')
+      .select('name')
+      .eq('user_id', user?.id);
+    
+    if (data) {
+      setUserSubjects(data.map(s => s.name));
+    }
+  };
+
+  const loadResources = async () => {
+    const { data } = await supabase
+      .from('teacher_resources')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (data) {
+      setResources(data);
+    }
+  };
 
   const loadChats = async () => {
     const { data } = await supabase
@@ -208,14 +248,29 @@ const StudentChat = () => {
     }
   };
 
+  const filteredResources = selectedSubject === 'all' 
+    ? resources.filter(r => userSubjects.includes(r.subject))
+    : resources.filter(r => r.subject === selectedSubject);
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
         <Sidebar className="border-r border-border/50">
-          <div className="p-4 border-b border-border/50">
-            <Button onClick={createNewChat} className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
+          <div className="p-4 border-b border-border/50 space-y-2">
+            <Button 
+              onClick={createNewChat} 
+              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
               <Plus className="mr-2 h-4 w-4" />
               New Chat
+            </Button>
+            <Button 
+              onClick={() => setShowResources(!showResources)} 
+              variant="outline"
+              className="w-full"
+            >
+              <BookOpen className="mr-2 h-4 w-4" />
+              Resources
             </Button>
           </div>
           <SidebarContent>
@@ -226,8 +281,11 @@ const StudentChat = () => {
                   {chats.map((chat) => (
                     <SidebarMenuItem key={chat.id}>
                       <SidebarMenuButton
-                        onClick={() => setCurrentChat(chat.id)}
-                        className={currentChat === chat.id ? 'bg-accent' : ''}
+                        onClick={() => {
+                          setCurrentChat(chat.id);
+                          setShowResources(false);
+                        }}
+                        className={currentChat === chat.id && !showResources ? 'bg-accent' : ''}
                       >
                         <MessageSquare className="h-4 w-4" />
                         <span className="truncate">{chat.title}</span>
@@ -251,16 +309,93 @@ const StudentChat = () => {
             <SidebarTrigger />
             <div className="ml-4 flex items-center gap-3">
               <Avatar className="h-10 w-10 border-2 border-primary">
-                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">S</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">
+                  {showResources ? 'R' : 'S'}
+                </AvatarFallback>
               </Avatar>
               <div>
-                <h2 className="font-semibold text-lg">Socrates</h2>
-                <p className="text-xs text-muted-foreground">Your AI Learning Assistant</p>
+                <h2 className="font-semibold text-lg">{showResources ? 'Learning Resources' : 'Socrates'}</h2>
+                <p className="text-xs text-muted-foreground">
+                  {showResources ? 'Study materials from your teachers' : 'Your AI Learning Assistant'}
+                </p>
               </div>
             </div>
           </header>
 
-          <ScrollArea className="flex-1 p-6">
+          {showResources ? (
+            <ScrollArea className="flex-1 p-6">
+              <div className="max-w-5xl mx-auto space-y-6">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl font-bold">Learning Resources</h1>
+                  <select 
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                    className="px-4 py-2 rounded-md border border-border bg-background"
+                  >
+                    <option value="all">All Subjects</option>
+                    {userSubjects.map(subject => (
+                      <option key={subject} value={subject}>{subject}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {filteredResources.length === 0 ? (
+                  <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
+                      <p className="text-lg font-medium text-muted-foreground">No resources available</p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Your teachers haven't uploaded any resources yet
+                      </p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredResources.map((resource) => (
+                      <Card key={resource.id} className="hover:shadow-md transition-shadow">
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg">{resource.title}</CardTitle>
+                              <CardDescription className="mt-1">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                                  {resource.subject}
+                                </span>
+                              </CardDescription>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const link = document.createElement('a');
+                                link.href = resource.document_url;
+                                link.download = resource.document_name;
+                                link.click();
+                              }}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </Button>
+                          </div>
+                        </CardHeader>
+                        {resource.description && (
+                          <CardContent>
+                            <p className="text-sm text-muted-foreground">{resource.description}</p>
+                            <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
+                              <FileText className="h-4 w-4" />
+                              <span>{resource.document_name}</span>
+                            </div>
+                          </CardContent>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          ) : (
+            <>
+              <ScrollArea className="flex-1 p-6">
             <div className="max-w-3xl mx-auto space-y-6">
               {messages.map((msg) => (
                 <div
@@ -318,6 +453,26 @@ const StudentChat = () => {
 
           <div className="border-t border-border/50 p-4">
             <div className="max-w-3xl mx-auto">
+              <div 
+                {...getDocRootProps()} 
+                className={`mb-3 p-6 border-2 border-dashed rounded-lg transition-colors ${
+                  isDocDragActive 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <input {...getDocInputProps()} />
+                <div className="flex flex-col items-center justify-center text-center">
+                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                  <p className="text-sm font-medium">
+                    {isDocDragActive ? 'Drop your document here' : 'Drag & drop a document here'}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    or click to browse (PDF, DOC, DOCX)
+                  </p>
+                </div>
+              </div>
+
               {(uploadedImage || uploadedDocument) && (
                 <div className="mb-3 flex gap-2 flex-wrap">
                   {uploadedImage && (
@@ -349,6 +504,7 @@ const StudentChat = () => {
                   )}
                 </div>
               )}
+
               <div className="flex gap-2">
                 <div {...getImageRootProps()} className="relative">
                   <input {...getImageInputProps()} />
@@ -359,17 +515,6 @@ const StudentChat = () => {
                     className={`transition-smooth ${isImageDragActive ? 'bg-accent' : ''}`}
                   >
                     <ImageIcon className="h-5 w-5" />
-                  </Button>
-                </div>
-                <div {...getDocRootProps()} className="relative">
-                  <input {...getDocInputProps()} />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className={`transition-smooth ${isDocDragActive ? 'bg-accent' : ''}`}
-                  >
-                    <FileText className="h-5 w-5" />
                   </Button>
                 </div>
                 <Input
@@ -390,6 +535,8 @@ const StudentChat = () => {
               </div>
             </div>
           </div>
+            </>
+          )}
         </main>
       </div>
     </SidebarProvider>

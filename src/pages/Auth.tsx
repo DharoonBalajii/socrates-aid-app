@@ -13,6 +13,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from '@/lib/utils';
 
 const AVAILABLE_SUBJECTS = [
+  'Maths',
   'Data Structures and Algorithm',
   'Computational Structures',
   'Problem Solving using Python',
@@ -21,6 +22,8 @@ const AVAILABLE_SUBJECTS = [
   'Engineering Physics',
   'Applied Chemistry'
 ];
+
+const TEACHER_SECRET_KEY = 'Qp2$z9Xv#6YcR7t@L4Jf';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -31,6 +34,7 @@ const Auth = () => {
   const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [role, setRole] = useState<'student' | 'teacher'>('student');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [teacherSecretKey, setTeacherSecretKey] = useState('');
   const { signUp, signIn, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -72,6 +76,15 @@ const Auth = () => {
       toast({
         title: 'Error',
         description: 'Please fill in all required fields including name, class number, and at least one subject',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (isSignUp && role === 'teacher' && teacherSecretKey !== TEACHER_SECRET_KEY) {
+      toast({
+        title: 'Access Denied',
+        description: 'Invalid teacher secret key. Please contact your administrator.',
         variant: 'destructive',
       });
       return;
@@ -193,17 +206,42 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="class-number">Class Number *</Label>
+                  <Label htmlFor="class-number">
+                    {role === 'teacher' ? 'Class Number(s) *' : 'Class Number *'}
+                  </Label>
                   <Input
                     id="class-number"
                     type="text"
-                    placeholder="10A"
+                    placeholder={role === 'teacher' ? 'e.g., 10A, 10B, 11C' : '10A'}
                     value={classNumber}
                     onChange={(e) => setClassNumber(e.target.value)}
                     className="transition-smooth focus:ring-primary"
                     required
                   />
+                  {role === 'teacher' && (
+                    <p className="text-xs text-muted-foreground">
+                      You can manage multiple classes with one account
+                    </p>
+                  )}
                 </div>
+
+                {role === 'teacher' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="secret-key">Teacher Secret Key *</Label>
+                    <Input
+                      id="secret-key"
+                      type="password"
+                      placeholder="Enter teacher secret key"
+                      value={teacherSecretKey}
+                      onChange={(e) => setTeacherSecretKey(e.target.value)}
+                      className="transition-smooth focus:ring-primary"
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Contact your administrator for the secret key
+                    </p>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label>
