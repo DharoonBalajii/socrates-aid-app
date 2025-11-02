@@ -128,6 +128,15 @@ const StudentChat = () => {
     
     console.log('Resources loaded:', data, 'Error:', error);
     
+    if (error) {
+      console.error('Error loading resources:', error);
+      toast({
+        title: 'Error loading resources',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+    
     if (data) {
       setResources(data);
     }
