@@ -108,10 +108,12 @@ const StudentChat = () => {
   }, [messages]);
 
   const loadUserSubjects = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('subjects')
       .select('name')
       .eq('user_id', user?.id);
+    
+    console.log('User subjects loaded:', data, 'Error:', error);
     
     if (data) {
       setUserSubjects(data.map(s => s.name));
@@ -119,10 +121,12 @@ const StudentChat = () => {
   };
 
   const loadResources = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('teacher_resources')
       .select('*')
       .order('created_at', { ascending: false });
+    
+    console.log('Resources loaded:', data, 'Error:', error);
     
     if (data) {
       setResources(data);
@@ -251,6 +255,8 @@ const StudentChat = () => {
   const filteredResources = selectedSubject === 'all' 
     ? resources.filter(r => userSubjects.includes(r.subject))
     : resources.filter(r => r.subject === selectedSubject);
+
+  console.log('Filtered resources:', filteredResources, 'All resources:', resources, 'User subjects:', userSubjects, 'Selected subject:', selectedSubject);
 
   return (
     <SidebarProvider>

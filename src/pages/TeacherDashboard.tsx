@@ -38,6 +38,7 @@ interface Resource {
 }
 
 const SUBJECTS = [
+  "Maths",
   "Data Structures and Algorithm",
   "Computational Structures",
   "Problem Solving using Python",
