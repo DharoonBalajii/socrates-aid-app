@@ -13,7 +13,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { cn } from '@/lib/utils';
 
 const AVAILABLE_SUBJECTS = [
-  'Maths',
+  'Mathematics',
   'Data Structures and Algorithm',
   'Computational Structures',
   'Problem Solving using Python',
